@@ -1,0 +1,48 @@
+.room .r {
+  flex-wrap: nowrap !important; }
+  .room .r .c {
+    min-width: 150px;
+    min-height: 200px;
+    overflow: auto; }
+    .room .r .c:hover {
+      background-color: #c8cbcf; }
+    .room .r .c::-webkit-scrollbar {
+      display: none; }
+    .room .r .c .rack {
+      max-width: 100px;
+      height: 30px; }
+      .room .r .c .rack td {
+        padding: 1px 1px;
+        overflow: hidden; }
+
+#sidebar {
+  width: 300px;
+  left: auto; }
+  #sidebar #sidebar-btn {
+    height: 50px; }
+  #sidebar #sidebar-content {
+    display: none;
+    width: 300px; }
+
+.increase-btn {
+  display: none;
+  justify-content: center; }
+  .increase-btn button {
+    width: 40px;
+    height: 40px; }
+
+.popover {
+  max-width: 700px; }
+
+.toast-position {
+  position: fixed;
+  bottom: 0;
+  right: 0; }
+
+.success-btn {
+  margin: 40px;
+  position: fixed;
+  bottom: 0;
+  right: 0; }
+
+/*# sourceMappingURL=index.css.map */

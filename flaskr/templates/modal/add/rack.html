@@ -1,0 +1,176 @@
+<div class="modal fade" tabindex="-1">
+	<div class="modal-dialog  modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">랙 추가</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+
+			<div class="modal-body">
+				<div class="container-fluid">
+					<div class="form-row">
+						<label class="col-2 col-form-label">이름 <small class="text-danger">*</small></label>
+						<div class="col-5">
+							<input type="text" class="form-control" id="title">
+						</div>
+						<div class="col align-self-center">
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="alarm_sound" checked="checked">
+								<label class="custom-control-label" for="alarm_sound" data-toggle="tooltip" data-placement="top" title="팝업 포함">소리</label>
+							</div>
+						</div>
+						<div class="col align-self-center">
+							<div class="custom-control custom-switch">
+								<input type="checkbox" class="custom-control-input" id="alarm_message" checked="checked">
+								<label class="custom-control-label" for="alarm_message" data-toggle="tooltip" data-placement="top" title="텔레그램">Bot</label>
+							</div>
+						</div>
+					</div>
+					<hr>
+								
+					<div class="form-row">
+						<label class="col-2 col-form-label">위치 <small class="text-danger">*</small></label>
+						<div class="col input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>열</small></span>
+							</div>
+							<input type="text" class="form-control" id="row">
+						</div>
+						<div class="col input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>행</small></span>
+							</div>
+								<input type="text" class="form-control" id="col">
+							</div>
+							<div class="col input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><small>순서</small></span>
+								</div>
+								<input type="text" class="form-control" id="ord">
+							</div>
+						</div>
+						<hr>
+
+					<div class="form-row form-group">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="랙에 알람주기가 설정되지 않았을 경우 위에 설정값이 적용 됩니다.(단위:분)">
+										알람 <small class="text-primary">*</small>
+						</label>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small data-toggle="tooltip" data-placement="top" title="팝업 포함">소리</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_sound">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small data-toggle="tooltip" data-placement="top" title="텔레그램">Bot</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_message">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="form-row">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="랙에 기준온도가 설정되지 않았을 경우 위에 온도값이 적용됩니다.(단위:℃)">
+										온도 <small class="text-primary tip">*</small>
+						</label>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>최소</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="temp_low">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">℃</small></span>
+							</div>
+						</div>
+						<div class="col-5 input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><small>최대</small></span>
+						</div>
+						<input type="text" class="form-control text-center" id="temp_max">
+						<div class="input-group-append">
+							<span class="input-group-text"><small class="text-muted">℃</small></span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary submit">저장</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal" >닫기</button>
+			</div>
+		</div>
+	</div>
+</div>	
+					
+<script type="text/javascript">
+	//툴팁표시
+	$("*[data-toggle='tooltip']").tooltip('show');
+
+	var rack_detail = JSON.parse(' {{ data | tojson | safe }} ');
+
+    $(document).ready(function(){
+		makeDetail(rack_detail);
+
+		//저장버튼 클릭시
+        $(".submit").click(function(){
+            var row = $("#row").val(),
+            	col = $("#col").val(),
+            	ord = $("#ord").val(),
+            	data = {"room_idx": main_data["room_idx"]};
+
+			//rack data 생성
+            $(".modal input[type='text']")
+                .each(function(i, input){
+                    var key = $(input).attr("id");
+                    	val = $(input).val();
+
+                    data[key] = val;
+                })
+            
+			// 스위치 값 확인 및 추가
+            $(".modal input[type='checkbox']")
+                .each(function(i, input){
+                    var key = $(input).attr("id");
+                    var val = "N";
+
+                    if ($(input).prop("checked")) {
+                        val = "Y";
+                    }
+
+                    data[key] = val;
+                })
+
+            $.ajax({
+                type: "POST",
+                url: "/modal/detail/" + main_data["room_idx"] + "/" + row + "/" + col + "/" + ord,
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                success: function(data){
+                    if (data == "success") {
+                        alert("저장되었습니다");
+                        location.reload();
+                    } else {
+                        alert(data);
+                    }
+                }
+            });
+        });
+    });
+
+	//위치값 전달
+	function makeDetail(data) {
+		for (var [k, v] of Object.entries(data)) {
+			$("#"+ k +"").val(v);
+		}
+	}
+</script>

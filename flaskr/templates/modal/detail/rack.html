@@ -1,0 +1,584 @@
+<div class="modal fade" id="detail-container-modal" tabindex="-1" aria-hidden="true" role="dialog">
+	<div class="modal-dialog  modal-dialog-centered">
+		<div class="modal-content">
+		<!-- modal header -->
+			<div class="container m-1">
+				<div class="modal-header row align-items-center">
+					<div class="row col-6 change_input align-items-center">
+						<div class="modal-title col-3 ml-2 mr-2">Rack</div>
+						<input type="text" class="form-control text-center col-5 ml-4" id="title" readonly>
+					</div>
+
+					<div class="row col-5 pr-0">
+						<span class="text-center"><small>소리(팝업)</small></span>
+						<div class="custom-switch">
+							<input type="checkbox" class="custom-control-input" id="alarm_sound" checked="checked">
+							<label class="custom-control-label" for="alarm_sound"></label>
+						</div>
+
+						<span class="text-center"><small>텔레그램</small></span>
+						<div class=" custom-control custom-switch">
+							<input type="checkbox" class="custom-control-input" id="alarm_message" checked="checked">
+							<label class="custom-control-label" for="alarm_message"></label>
+						</div>
+					</div>
+
+					<button type="button" class="close col-1 ml-0 mr-1" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+			</div>
+
+			<!-- modal body -->
+			<div class="modal-body">
+				<!-- 위치 -->
+				<div class="container change_input m-1">
+					<div class="row align-items-center">
+						<div class="col-2 h6 text-center">위치</div>
+
+						<div class="row col-10">
+							<div class="input-group col">
+								<div class="input-group-prepend">
+									<span id="alarm_cycle" class="input-group-text"><small>열</small></span>
+								</div>
+								<input type="text" class="form-control text-center" id="row" readonly>
+							</div>
+
+							<div class="input-group col">
+								<div class="input-group-prepend">
+									<span id="alarm_cycle" class="input-group-text"><small>행</small></span>
+								</div>
+								<input type="text" class="form-control text-center" id="col" readonly>
+							</div>
+
+							<div class="input-group col">
+								<div class="input-group-prepend">
+									<span id="alarm_cycle" class="input-group-text"><small>순서</small></span>
+								</div>
+								<input type="text" class="form-control text-center" id="ord" readonly>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr>
+
+				<!-- tooltip -->
+				<!--<button class="btn btn-dark btn-sm tip">tip</button>-->
+
+				<!-- 갱신주기 -->
+				<div class="container change_input m-1 settings">
+					<div class="row align-items-center change_attr">
+						<div class="col-2 h6 text-center tip">알람</div>
+
+						<div class="input-group col-5">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>소리(팝업)</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_sound" readonly>
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+
+						<div class="input-group col-5">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>텔레그램</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_message" readonly>
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- 온도 -->
+				<div class="container change_input m-1 settings">
+					<div class="row align-items-center change_attr">
+						<div class="col-2 text-center tip">온도</div>
+
+						<div class="input-group col col-5">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>최저</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="temp_low" readonly>
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">℃</small></span>
+							</div>
+						</div>
+
+						<div class="input-group col-5">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>최대</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="temp_max" readonly>
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">℃</small></span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="container offset-10">
+					<div class="row">
+						<button type="button" class="btn btn-sm btn-primary ml-1 mt-1 ml-4" id="change">수정</button>
+					</div>
+				</div>
+
+				<div class="container">
+					<div class="row offset-2">
+						<div class="ml-2 mt-1">
+							<button type="button" class="btn btn-sm btn-danger"  id="delete_rack" hidden>삭제</button>
+						</div>
+
+						<div class="offset-7">
+							<button type="button" class="btn btn-sm mt-1 mb-1 ml-1 btn-primary" id="save" hidden>저장</button>
+							<button type="button" class="btn btn-sm btn-secondary mt-1 mb-1" id="cancel" hidden>취소</button>
+						</div>
+					</div>
+				</div>
+				<hr class="data_check" hidden>
+
+				<div class="container data_check" hidden>
+					<div class="input-group input-group-sm align-items-center mb-2">
+						<div class="input-group-prepend">
+							<span class="input-group-text">센서</span>
+						</div>
+						<select class="custom-select text-center col-2" id="position">
+							
+						</select>
+						<div class="input-group-prepend">
+							<span class="input-group-text">MAC</span>
+						</div>
+						<input type="text" class="form-control text-center col-7" id="sensor_mac" readonly>
+						<div class="input-group-append">
+							<button type="button" class="btn btn-sm btn-danger"  id="delete_sensor">삭제</button>
+						</div>
+					</div>
+
+					<table class="table table-sm table-hover table-bordered log-table text-center">
+						<thead>
+							<tr class="bg-light">
+								<th>온도(°C)</th>
+								<th>습도(%)</th>
+								<th>시간</th>
+							</tr>
+						</thead>
+						<tbody class="copydom text-center">
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<nav aria-label="Page navigation">
+				<ul class="pagination justify-content-center align-items-center" id="pagingul">
+				</ul>
+			</nav>
+
+			<!-- modal footer -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" >닫기</button>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+<script type="text/javascript">
+
+var rack_detail = JSON.parse('{{ data | tojson | safe }}');
+	log_data = JSON.parse(' {{ log_data | tojson | safe }} ');
+	standard_apply = JSON.parse('{{ standard_apply | tojson | safe }}');
+
+
+//로그 데이터 만들기
+function makeLog(position, page){
+	$.ajax({
+		type: "GET",
+		url: "/modal/detail/log/" + rack_detail["title"] + "/" + position,
+		contentType: "application/json",
+		data: {
+			page: page
+		},
+		success: function(data){
+			log_data = data;
+			totalData = log_data['total']
+
+			displayData( currentPage, dataPerPage );
+		}
+	})
+}
+
+//센서 변경시
+$("#position").change(function(){
+	var position = $(this).val();
+	makeLog(position, 1);
+})
+
+
+$("#delete_sensor").click(function(){
+	var comment = "선택한 센서데이터를 삭제합니다.\n삭제하시겠습니까?"
+
+	if (!confirm(comment)) {
+		return ;
+	}
+
+	var data = {
+		"rack": $("#title").val(),
+		"position": $("#position").val()
+	}
+
+	$.ajax({
+		type: "DELETE",
+		url: "/room/" + main_data['room_idx'] + "/currentData",
+		contentType: "application/json",
+		data: JSON.stringify(data),
+		success: function(result){
+			alert(result);
+			location.reload();
+		}
+	})
+})
+
+//check box event
+$(".modal input[type='checkbox']").change(function(){
+	var is_checked = $(this).prop("checked");
+		key = $(this).attr("id");
+		val = is_checked ? "Y" : "N"
+		data = {};
+
+	data[key] = val;
+
+	$.ajax({
+		type: "PUT",
+		url: "/modal/detail/" + main_data['room_idx'] + "/" + rack_detail["row"] + "/" + rack_detail["col"] + "/" + rack_detail["ord"],
+		contentType: "application/json",
+		data: JSON.stringify(data),
+		success: function(result){
+
+		}
+	})
+})
+
+//save btn 클릭시
+$("#save").click(function(){
+	var data = {
+		"room_idx": main_data['room_idx']
+	}
+
+	$(".modal input")
+		.not("input[type='checkbox']")
+		.not("#sensor_mac")
+		.each(function(i, input){
+			var key = $(input).attr("id");
+				val = $(input).val() == "" ? null : $(input).val();
+
+			data[key] = val;
+		})
+
+		$.ajax({
+			type: "PUT",
+			url: "/modal/detail/" + main_data['room_idx'] + "/" + rack_detail["row"] + "/" + rack_detail["col"] + "/" + rack_detail["ord"],
+			contentType: "application/json",
+			data:JSON.stringify(data),
+			success: function(result){
+				if (result == "success") {
+					alert("저장되었습니다.")
+					return location.reload();
+				}
+
+				alert(result);
+			}
+		})
+})
+
+//delete_rack 클릭시
+$("#delete_rack").click(function(){
+	var comment = "삭제하시겠습니까?"
+
+	if (confirm(comment)) {
+		$.ajax({
+			type: "DELETE",
+			url: "/modal/detail/" + main_data['room_idx'] + "/" + rack_detail["row"] + "/" + rack_detail["col"] + "/" + rack_detail["ord"],
+			success: function(data){
+				if (data == "success") {
+					alert("삭제되었습니다");
+					return location.reload();
+				}
+
+				alert(data)
+			}
+		})
+	}
+})
+
+//tooltip
+$(document).on("mouseover", ".settings input", function(){
+	$(this).tooltip("dispose");
+
+	if ($(this).val() != "*" || !$(this).prop("readonly")) {
+		return ;
+	}
+
+	var k = $(this).attr("id");
+		v = standard_apply[k];
+
+		options = {
+		placement: "top",
+		title: v
+	}
+
+	$(this).tooltip(options);
+	$(this).tooltip("show");
+})
+
+$(document).on("mouseover", ".tip", function(){
+	var title = '" * " 으로 표시됬을 경우 서버실 설정값이 적용됩니다.\n마우스를 위로 올릴 경우 설정값을 확인할 수 있습니다.';
+		options = {
+		html: true,
+		placement: "top",
+		title: title
+	}
+
+	$(this).tooltip(options);
+	$(this).tooltip("show");
+})
+
+
+//페이징 시작
+var totalData = log_data.total; //총 데이터 수
+var dataPerPage = 5; //한 페이지에 나타낼 글 수
+var pageCount = 5; //페이징에 나타낼 버튼 수
+var currentPage = 1; //현재 페이지
+
+
+//페이징 표시 호출
+function paging( totalData, dataPerPage, pageCount, currentPage )
+{
+	totalPage = Math.ceil( totalData / dataPerPage );// 6
+
+	if( totalPage < pageCount )
+	{
+		pageCount = totalPage;
+	}
+
+	var pageGroup = Math.ceil( currentPage / pageCount ); // 페이지 그룹 //
+	var last = pageGroup * pageCount; //화면에 보여질 마지막 페이지 번호 //
+
+	var first = last - ( pageCount - 1 ); //화면에 보여질 첫번째 페이지 번호
+	var next = last + 1; //
+	var prev = first - 5; //
+
+	var pageHtml = "";
+
+	if ( prev > 0 )
+	{
+		pageHtml += "<li class='page-item'><a class='page-link'  name='pagingbtn' id='prev' href='#' aria-label='Previous'><span>&laquo;</span></a></li>";
+	}
+
+	if (last > totalPage)
+	{
+		last = totalPage;//6
+	}
+
+	//페이징 번호 표시
+	for ( var i = first; i <= last; i++ )
+	{
+		if ( i > totalPage )
+		{
+			break;
+		}
+		else
+		{
+			pageHtml += "<li class='page-item' check='" + i + "'><a class='page-link' name='pagingbtn' href='#' id='" + i + "'>" + i + "</a></li>";
+		}
+	}
+
+	if ( last < totalPage )
+	{
+		pageHtml += "<li class='page-item'><a class='page-link'  name='pagingbtn' id='next' href='#' aria-label='Next'><span aria-hidden='true'>&raquo;</span></a></li>";
+	}
+
+	$( "#pagingul" ).html( pageHtml );
+
+	//페이징 번호 클릭 이벤트
+	$("#pagingul li a").click(function ()
+	{
+		var id = $(this).attr("id");
+		selectedPage = $(this).text();
+
+		if ( id == "next" ) selectedPage = next;
+		if ( id == "prev" ) selectedPage = prev;
+
+		//전역변수에 선택한 페이지 번호를 담는다...
+		currentPage = selectedPage;
+		makeLog($("#position").val(), selectedPage)
+		//페이징 표시 재호출
+		paging( totalData, dataPerPage, pageCount, currentPage );
+		//글 목록 표시 재호출
+		displayData( currentPage, dataPerPage );
+	});
+};
+
+//현재 페이지(currentPage)와 페이지당 글 개수(dataPerPage) 반영
+function displayData( currentPage, dataPerPage )
+{
+	var chartHtml = "";
+	//Number로 변환하지 않으면 아래에서 +를 할 경우 스트링 결합이 되어버림..
+	currentPage = Number(currentPage);
+	dataPerPage = Number(dataPerPage);
+	var check = (currentPage - 1) * dataPerPage + dataPerPage;
+	if ( check > totalData )
+	{
+		check = totalData;
+	}
+
+	for ( var i = 0; i < Object.keys(log_data.log).length; i++ )//6: 25, 30
+	{
+		chartHtml += "<tr>" + "<td>" + log_data.log[ i ].temperature + "</td>" + "<td>" + log_data.log[ i ].humidity + "</td>" + "<td>" + log_data.log[ i ].date_insert + "</td>" + "</tr>";
+		$(".copydom").html( chartHtml );
+	}
+}
+
+
+$( document ).ready( function()
+{
+	if ( log_data.total != 0 )
+	{
+		$( ".data_check" ).attr( "hidden", false );
+	}
+	console.log(rack_detail)
+	if ( rack_detail.sensors )
+	{
+		$("#position").val( $("#position").val() );
+		for( var key in rack_detail["sensors"] )
+		{
+			$( "#position" ).append( "<option>" + key +  "</option>" );
+		}
+		$( "#sensor_mac" ).val( rack_detail.sensors[ parseInt( $("#position").val() ) ] );
+	}
+
+	for ( var i = 0; i <= Object.keys(rack_detail).length; i++  )
+	{
+		if ( rack_detail[ "alarm_message" ] == "N" )
+		{
+			$( "#alarm_message" ).removeAttr( checked="checked" );
+		}
+		if ( rack_detail[ "alarm_sound" ] == "N" )
+		{
+			$( "#alarm_sound" ).removeAttr( checked="checked" );
+		}
+
+		if ( Object.values( rack_detail )[ i ] == null) {
+			$( "#" + Object.keys( rack_detail )[ i ] ).val("*")	;
+			continue;
+		}
+
+		$ ( "#" + Object.keys( rack_detail )[ i ] ).val( Object.values( rack_detail )[ i ] );
+
+	}
+	displayData( currentPage, dataPerPage );
+	paging( totalData, dataPerPage, pageCount, currentPage );
+
+	if ( $( "#pagingul" ).find("li").closest(".active").length == 0 )
+	{
+		if ( $( "#pagingul" ).find( "li:first" ).attr( "check" ) == 1 )
+		{
+			$( "#pagingul" ).find( "li:first" ).attr( "class", "page-item active" );
+		}
+	}
+	$("#position").val(Object.keys(rack_detail.sensors)[0]);
+} );
+
+//Rack, 위치, 알람,온도 값 변경 버튼
+$( function()
+{
+	$( document ).on( "click", "#change", function()
+	{
+		$(".modal-body").children(".change_input").find("input").attr( "readonly", false );
+		$(".modal-header").children(".change_input").find("input").attr( "readonly", false );
+
+		$( this ).attr( "hidden", true );
+		$( this ).parents(".container").next().find("#save").attr( "hidden", false );
+		$( this ).parents(".container").next().find("#cancel").attr( "hidden", false );
+		$( this ).parents(".container").next().find("#delete_rack").attr( "hidden", false );
+
+		$(".settings input").each(function(i, input){
+			var target = $(input);
+
+			if (target.val() == "*") {
+				target.val("");
+			}
+		});
+	} );
+
+	$( document ).on( "click", "#cancel", function()
+	{
+		 for ( var i = 0; i <= Object.keys(rack_detail).length; i++  )
+		 {
+			if ( Object.values( rack_detail )[ i ] == null) {
+				$( "#" + Object.keys( rack_detail )[ i ] ).val("*")	;
+				continue;
+			}
+
+			$ ( "#" + Object.keys( rack_detail )[ i ] ).val( Object.values( rack_detail )[ i ] );
+		 }
+
+		$(".modal-body").children(".change_input").find("input").attr( "readonly", true );
+		$(".modal-header").children(".change_input").find("input").attr( "readonly", true );
+		$( this ).parents(".container").prev().find("#change").attr( "hidden", false );
+		$( this ).attr( "hidden", true );
+		$( this ).prevAll("#save").attr( "hidden", true );
+		$( this ).parents("div").find("#delete_rack").attr( "hidden", true );
+	} );
+
+	$( document ).on("click", "a[name='pagingbtn']", function()
+	{
+		var li_ch = $( this ).parent().attr( "check" );
+		var a_ch = $( this ).attr("id");
+
+		if ( li_ch == a_ch )
+		{
+			$( "#" + a_ch ).parent().attr( "class", "page-item active" );
+		}
+		else
+		{
+			$( "#" + a_ch ).parent().attr( "class", "page-item" );
+		}
+
+		if ( $( "#pagingul li a" ).parent( "li" ).closest( ".active" ).length  == 0 )
+		{
+			if ( $( "#pagingul li a" ).parent( "li:first" ).attr( "check" ) == 1 )
+			{
+				$( "#pagingul li a" ).parent( "li:first" ).attr( "class", "page-item active" );
+			}
+			else
+			{
+				$( "#pagingul li a" ).parent( "li:eq(1)" ).attr( "class", "page-item active" );
+			}
+		}
+	} );
+
+	// #position 갑 변경할때마다 실행
+	$( "#position" ).change( function()
+	{
+		$( "#sensor_mac" ).val( rack_detail.sensors[ $( "#position" ).val() ] );
+		if ( $( "#pagingul li a" ).parent( "li:first" ).attr( "check" ) == 1 )
+		{
+			displayData( currentPage, dataPerPage );
+			paging( totalData, dataPerPage, pageCount, currentPage );
+			$( "#pagingul" ).find("li").closest(".active").removeClass("active");				
+			$( "#pagingul li a" ).parent( "li:first" ).attr( "class", "page-item active" );
+		}
+		else
+		{
+			displayData( currentPage, dataPerPage );
+			paging( totalData, dataPerPage, pageCount, currentPage );
+			$( "#pagingul" ).find("li").closest(".active").removeClass("active");				
+			$( "#pagingul li a" ).parent( "li:eq(1)" ).attr( "class", "page-item active" );
+		}
+	} );
+} );
+</script>
+</body>
+</html>
+

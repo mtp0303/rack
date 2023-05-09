@@ -1,0 +1,181 @@
+<div class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+			<div class="modal-header">
+				<h5 class="modal-title">서버실 추가</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div class="container-fluid">
+					<div class="form-row">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="중복된 서버실 이름은 사용 할 수 없습니다.">
+							이름 <small class="text-danger">*</small>
+						</label>
+						<div class="col-5">
+							<input type="text" class="form-control" id="title">
+						</div>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>순서</small></span>
+							</div>
+							<input type="text" class="form-control" id="ord">
+						</div>
+					</div>
+
+					<hr>
+
+					<div class="form-row form-group">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="관리자도구 알림설정의 `랙온도(서버실)` 항목에 수신설정이 필요합니다.">
+							부서 <small class="text-primary">*</small>
+						</label>
+						<div class="col-10">
+							<select class="form-control" id="department_code">
+								<option></option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-row form-group">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="랙에 알람주기가 설정되지 않았을 경우 위에 설정값이 적용 됩니다.(단위:분)">
+							알람 <small class="text-danger">*</small>
+						</label>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small data-toggle="tooltip" data-placement="top" title="팝업 포함">소리</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_sound">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small data-toggle="tooltip" data-placement="top" title="텔레그램">Bot</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="cycle_message">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">분</small></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-row">
+						<label class="col-2 col-form-label" data-toggle="tooltip" data-placement="top" title="랙에 기준온도가 설정되지 않았을 경우 위에 온도값이 적용됩니다.(단위:℃)">
+							온도 <small class="text-danger">*</small>
+						</label>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>최소</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="temp_low">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">℃</small></span>
+							</div>
+						</div>
+						<div class="col-5 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><small>최대</small></span>
+							</div>
+							<input type="text" class="form-control text-center" id="temp_max">
+							<div class="input-group-append">
+								<span class="input-group-text"><small class="text-muted">℃</small></span>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+            <div class="modal-footer">
+				<button type="button" class="btn btn-primary modify-after submit">저장</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+		</div>
+
+
+<script>
+//툴팁표시	
+$("*[data-toggle='tooltip']").tooltip('show');
+
+    function makeDepartmentCode(){
+        $.ajax({
+            type: "GET",
+            url: "/department",
+            dataType: "json",
+            success: function(data) {
+                for (d of data) {
+                    $("#department_code option:eq(0)")
+                        .clone()
+                        .appendTo("#department_code")
+                        .attr("value", d["code"]) 
+                        .text(d["name"])
+                }
+                $("#department_code option:eq(0)").remove()
+            }
+        })
+    }
+
+
+    $(document).ready(function () {
+        //관리 부터 출력
+        makeDepartmentCode();
+
+        //tooltip 실행
+        $("[data-toggle='tooltip']").tooltip();
+			
+
+        $(".submit").click(function(){
+            var data = {};
+				err = '';
+            $(".modal input").not("#ord").each(function(i, input){
+                var key = $(input).attr("id");
+                    val = $(input).val();
+                
+				if (val === '' || val === undefined) {
+					return err = "필수 입련란을 확인해주세요" ;
+				}
+
+				data[key] = val;
+            })
+
+            data["department_code"] = $("#department_code").val();
+			data["ord"] = $("#ord").val();
+			
+			if (err !== '') {
+				return alert(err);
+			}
+
+            $.ajax({
+                type: 'POST',
+                url: '/room/',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(data){
+                    var reg = /\D/; 
+                    if (!reg.test(data)) { //data 가 only 숫자면 성공(room_idx 값은 return)
+                        $(".room-list:eq(0)")
+                            .clone()
+                            .insertBefore(".nav-item:eq(-1)")
+                            .attr("href", "/room/" + data)
+                            .children()
+                            .text($("#title").val())
+
+                            alert("저장되었습니다");
+                            return location.href = "/room/" + data;
+                    }
+
+                    alert(data)
+                }
+            })
+        })
+    });
+</script>
+
+

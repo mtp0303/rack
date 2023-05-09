@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-4.6.0-dist/css/bootstrap.min.css') }}">
+    <link rel="icon" href="/static/img/favicon.ico">
+    <title>랙 온도 모니터링 시스템</title>
+</head>
+<body>
+    <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js') }}"></script>
+    <div class="container-fluid">
+        <table class="table table-hover table-sm">
+            <thead class="thead-dark">
+                <tr class="text-center">
+                    <th>#</th>
+                    <th>랙 번호</th>
+                    <th>위치</th>
+                    <th>맥주소</th>
+                    <th>온도</th>
+                    <th>습도</th>
+                    <th>시간</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="text-center">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+    
+            </tbody>
+        </table>
+    </div>
+    <select class="custon-select">
+        
+    </section>
+
+
+    <script>
+        $(document).ready(function(){
+            refreshData();
+
+            setInterval(function(){
+                refreshData();
+            },1000)
+        })
+
+        function refreshData() {
+            $.ajax({
+                type: 'GET',
+                url: '/list/update',
+                dataType: 'json',
+                success: function(data){
+                    makeList(data);
+                }
+            })
+        }
+
+        function makeList(data) {
+            //초기화
+            $("tbody tr")
+                .not("tbody tr:eq(0)")
+                .remove();
+
+            var ord = ['no', 'rack', 'position', 'mac', 'temperature', 'humidity', 'date_update'];
+                
+            for (d of data) {
+                $("tbody tr:eq(0)")
+                    .clone()
+                    .appendTo("tbody")
+                    .children("td")
+                    .each(function(i, td) {
+                        $(td).text(d[ord[i]])
+                    })
+            }
+
+            $("tbody tr:eq(0)").remove();
+        }
+
+        
+    </script>
+
+</body>
+</html>

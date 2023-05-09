@@ -1,0 +1,196 @@
+<div class="modal fade" tabindex="-1" aria-hidden="true" role="dialog">
+    <div class="modal-dialog  modal-dialog-centered">
+        <div class="modal-content">
+        <!-- modal header -->
+            <div class="container m-1">
+                <div class="modal-header row align-items-center">
+                    <div class="row col-7 align-items-center">
+                        <div class="modal-title">서버실 설정</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- modal body -->
+            <div class="modal-body">
+                <!-- 서버 이름 -->
+                <div class="container m-1">
+                    <div class="row align-items-center">
+                        <div type="button" class="col-2 h6 text-center p-2">서버실 이름</div>
+                        <input type="text" class="form-control text-center col-5 ml-3" id="title" readonly>
+                        <div type="button" class="col-2 h6 text-center p-2">순서</div>
+                        <input type="text" class="form-control text-center col-2 ml-3" id="ord" readonly>
+                    </div>
+                </div>
+                <hr>
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div type="button" class="col-2 h6 text-center">관리 부서</div>
+                        <div class="col-6">
+                            <select class="custom-select" id="department_code" disabled>
+                                <option></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <!-- 알람 -->
+                <div class="container m-1">
+                    <div class="row align-items-center">
+                        <div type="button" class="col-2 h6 text-center" >*알람</div>
+
+                        <div class="input-group col-5">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><small>소리</small></span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="cycle_sound" readonly>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><small class="text-muted">분</small></span>
+                            </div>
+                        </div>
+                        <div class="input-group col-5">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><small>팝업</small></span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="cycle_message" readonly>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><small class="text-muted">분</small></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 온도 -->
+                <div class="container m-1">
+                    <div class="row align-items-center">
+                        <div type="button" class="col-2 h6 text-center">*온도</div>
+                        <div class="input-group col col-5">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><small>최저</small></span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="temp_low" readonly>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><small class="text-muted">℃</small></span>
+                            </div>
+                        </div>
+
+                        <div class="input-group col-5">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><small>최대</small></span>
+                            </div>
+                            <input type="text" class="form-control text-center" id="temp_max" readonly>
+                            <div class="input-group-append">
+                                <span class="input-group-text"><small class="text-muted">℃</small></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary modify-after submit d-none">저장</button>
+                <button type="button" class="btn btn-danger modify-after modify-cencle d-none">취소</button>
+                <button type="button" class="btn btn-primary modify">변경</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var room_detail = JSON.parse('{{ data | tojson | safe }}');
+
+    //room 정보 출력
+    function makeRoomDetail() {
+        for (var k in room_detail) {
+            $("#" + k).val(room_detail[k])
+        }
+    }
+
+    // footer btn 기능//
+
+    //수정 버튼 클릭시
+    $(".modify").click(function(){
+        $(".modal input").attr("readonly", false); //input 활성화
+        $("#department_code").attr("disabled", false); //select box 활성화
+        $(".modify-after").removeClass("d-none"); // 저장/(수정)취소 버튼 활성화
+        $(this).addClass("d-none"); // 수정 버튼 비활성화
+    })
+
+    //(수정)취소 버튼 클릭시
+    $(".modify-cencle").click(function(){
+
+        makeRoomDetail(); //원래 room_detail 값을 출력
+
+        $(".modal input").attr("readonly", true); // input 비활성화
+        $("#department_code").attr("disabled", true); //select box 비활성화
+        $(".modify-after").addClass("d-none"); // 저장/(수정)취소 버튼 비활성화
+        $(".modify").removeClass("d-none"); // 수정 버튼 활성화
+    })
+    
+    //추가 버튼 클릭시
+    $(".submit").click(function(){
+        var data = {}
+            err = '';
+        //data 생성
+        //input을 loop 돌며 data 정의
+        $(".modal input").not("#ord").each(function(i, input){
+            var k = $(input).attr("id");
+                v = $(input).val();
+                
+            if (v === '' || v === undefined) {
+                return err = "필수 입련란을 확인해주세요" ;
+            }
+            data[k] = v;
+        })
+        
+        data["department_code"] = $("#department_code").val();
+        data["ord"] = $("#ord").val();
+
+        if (err !== '') {
+            return alert(err);
+        }
+
+        //데이터 호출
+        $.ajax({
+            type: "PUT",
+            url: "/modal/detail/" + main_data["room_idx"],
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function(data) {
+                if (data == "success") {
+                    alert("저장되었습니다");
+                    return location.reload();
+                }
+                alert(data)
+            }
+        })
+    })
+
+    //부서 데이터 호출
+    function makeDepartmentCode(){
+        $.ajax({
+            type: "GET",
+            url: "/department",
+            dataType: "json",
+            success: function(data) {
+                for (d of data) {
+                    $("#department_code option:eq(0)")
+                        .clone()
+                        .appendTo("#department_code")
+                        .attr("value", d["code"]) 
+                        .text(d["name"])
+                }
+                
+                $("#department_code option:eq(0)").remove()
+                $("#department_code option[value='"+ room_detail["code"] +"']").attr("selected", true)
+            }
+        })
+    }
+
+    $(document).ready(function(){
+        makeRoomDetail();
+        makeDepartmentCode();
+    })
+</script>
+
+

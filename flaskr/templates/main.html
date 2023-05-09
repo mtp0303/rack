@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-4.6.0-dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="/static/css/index.css" />
+    <link rel="icon" href="/static/img/favicon.ico">
+    <title>서버실 랙 온도 모니터링 시스템</title>
+</head>
+
+<body>
+    <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        //상수 및 변수 공통 데이터
+        const audioFile = new Audio("{{ url_for('static', filename='sound/switch.oga') }}");
+
+        var main_data = JSON.parse('{{ main_data | tojson | safe }}')
+    </script>
+
+    <!-- room tab -->
+    <ul class="nav nav-tabs pt-3" id="server-room">
+        <li class="nav-item room-list d-none">
+            <a class="nav-link tab-list"></a>
+        </li>
+
+        <li class="nav-item room-list d-none">
+            <a class="nav-link dropdown-toggle tab-list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" id="modify-room-btn">랙 추가/삭제</a>
+                <a class="dropdown-item" href="#" id="detail-room">서버실 설정</a>
+                <a class="dropdown-item" href="#" id="rm-room-btn">서버실 삭제</a>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <button type="button" class="btn nav-link btn-outline-info" id="add-room-btn">서버실 추가</button>
+        </li>
+        <li class="nav-item bg-">
+            <a type="button" href="/list" target="_blank" class="btn nav-link btn-outline-info" id="list">최신 로그</a>
+        </li>
+    </ul>
+    <!-- room data content -->
+    <div class="room p-3">
+        <div class="r row">
+            <div class="increase-btn align-self-center">
+                <div class="align-self-center d-flex flex-column">
+                    <button type="button" class="btn btn-danger m-1 rm-row-btn">-</button>
+                </div>
+            </div>
+            <div class="c p-3 m-1 text-center border border-5">
+                <table class="table table-bordered">
+                    <tbody class="rack-list">
+                        <tr class="rack d-none">
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="increase-btn align-self-center">
+                <div class="align-self-center d-flex flex-column">
+                    <button type="button" class="btn btn-primary m-1 add-col-btn">+</button>
+                    <button type="button" class="btn btn-danger m-1 rm-col-btn">-</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="increase-btn">
+        <div class="text-center">
+            <button type="button" class="btn btn-secondary add-row-btn">+</button>
+        </div>
+    </div>
+    <div class="success-btn d-none">
+        <button class="btn btn-lg btn-primary">완료</button>
+    </div>
+
+    <!-- popover content -->
+    <div class="d-none" id="popover-content">
+        <table class="table table-sm table-bordered text-center">
+            <thead>
+                <tr class="bg-light">
+                    <th>위치</th>
+                    <th>온도(°C)</th>
+                    <th>습도(%)</th>
+                    <th>시간</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="current-log">
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                    <td class="align-middle"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- toast -->
+    <div class="toast-position m-3">
+        <div class="toast hide ex" aria-live="assertive" aria-atomic="true" data-delay="3000" data-autohide="false">
+            <div class="toast-header bg-dark">
+                <strong class="mr-auto text-light">경고</strong>
+                <small class="time text-light"></small>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body bg-dark text-light">
+                <strong>
+                    <span class="">
+                        <a class="text-danger rack-title" href="#">2605</a>
+                    </span>
+                </strong> 에서 문제가 발생하였습니다
+            </div>
+        </div>
+    </div>
+
+    <!-- modal -->
+    <div id="modal"></div>
+
+    <script type="text/javascript">
+
+        //room tab 생성
+        function makeRoomList(data) {
+            // room_data 가 없을경우
+            // 서버실 추가 버튼을 활성화 해서 서버실 추가 유도
+            if (data.length < 1 ) {
+                $(".r").remove();
+                return $("#add-room-btn").trigger("click");
+            }
+            
+            
+            //dropdown menu 활성화
+            for (var room of data) {
+                var active = ""; // 현재 페이지일 경우 "active"
+                    li_num = 0; //dropdown menu 0 -> 비활성화 / 1 -> 활성화
+                
+                //현재 페이지 활성화
+                if (room["idx"] == main_data["room_idx"]) { 
+                    active = "active";
+                    li_num = 1
+                }
+
+                //room page tab 생성
+                $(".room-list:eq("+ li_num +")")
+                    .clone()
+                    .insertBefore(".nav-item:eq(-2)")
+                    .removeClass("d-none")
+                    .children("a")
+                    .text(room["title"])
+                    .attr("href", "/room/" + room["idx"])
+                    .addClass(active);
+            }
+
+            $("#server-room .d-none").remove();
+        }
+
+        //container 생성
+        function makeContainer(data) {
+
+            // data가 없을경우 return
+            if (data.length < 1) {
+                $(".r:eq(0)").after("<hr>");
+                return ;
+            }
+
+            //row 생성
+            for (var r in data) {
+                var container = data[r];
+
+                $(".r:eq(0)")
+                    .clone()
+                    .removeClass("d-none")
+                    .appendTo(".room")
+                    .after("<hr>");
+
+                //col 생성
+                for (var c in container) {
+                    var rack = container[c];
+                        row = parseInt(r) + 1;
+                        col = parseInt(c) + 1;
+                        container_location = ".r:eq(" + row + ") .c:eq(" + col + ")";
+
+                    $(".r:eq(0) .c:eq(0)")
+                        .clone()
+                        .insertBefore(".r:eq("+ row +") .increase-btn:eq(1)" );
+
+                    $(container_location + " .rack:eq(0)").addClass("d-none");
+
+                    //rack 생성
+                    for (var ra of rack) {
+                        $(".rack:eq(0)")
+                            .clone()
+                            .appendTo(container_location + " .rack-list")
+                            .removeClass("d-none")
+                            .children()
+                            .text(ra["title"]);
+                    }
+                }
+                $(".r:eq(" + row + ") .c:eq(0)").remove();
+            }
+
+            $(".r:eq(0)").remove();
+            $(".r .d-none").remove();
+        }
+
+        //modal//
+        //서버실 추가 버튼 클릭시
+        $(document).on("click", "#add-room-btn", function () {
+            $.ajax({
+                type: "GET",
+                url: "/modal/add/room",
+                success: function(data) {
+                    $("#modal")
+                        .html(data)
+                        .children(".modal")
+                        .modal("show");
+                }
+            })
+        });
+
+        //.c(container) 클릭시
+        $(document).on("click", ".c", function(){
+            var row = $(".r").index($(this).parents(".r"));
+                col = $(".r:eq("+ row +") .c").index($(this));
+                ord = $(".r:eq("+ row +") .c:eq("+ col +") .rack").not(".d-none").length;
+            
+            $.ajax({
+                type: "GET",
+                url: "/modal/detail/" + main_data["idx"] + "/" + (row + 1) + "/" + (col + 1) + "/" + (ord + 1),
+                success: function(data){
+                    $("#modal")
+                        .html(data)
+                        .children(".modal")
+                        .modal("show");
+                }
+            })
+        })
+
+        //rack 클릭시
+        $(document).on("click", ".rack", function (event) {
+            //상위 이벤트 실행 중단 (.c click event)
+            event.stopPropagation(); 
+
+            var row = $(".r").index($(this).parents(".r"));
+                col = $(".r:eq("+ row +") .c").index($(this).parents(".c"));
+                ord = $(".r:eq("+ row +") .c:eq("+ col +") .rack").index(this);
+
+            $.ajax({
+                type: "GET",
+                url: "/modal/detail/" + main_data["room_idx"] + "/" + (row + 1) + "/" + (col + 1) + "/" + (ord + 1),
+                success: function(data) {
+                    $("#modal")
+                        .html(data)
+                        .children(".modal")
+                        .modal("show")
+                }
+            })
+        });
+
+        //btn event//
+        //drop down 수정 버튼 클릭시
+        $(document).on("click", "#modify-room-btn", function(){
+            $(".increase-btn").css("display", "block");
+            $(".success-btn").removeClass("d-none");
+            $(".toast").addClass("d-none");
+        })
+
+        //drop down 서버실 정보 클릭시
+        $(document).on("click", "#detail-room", function(){
+            $.ajax({
+                type: "GET",
+                url: "/modal/detail/" + main_data["room_idx"],
+                success: function(data){
+                    $("#modal")
+                        .html(data)
+                        .children(".modal")
+                        .modal("show");
+                }
+            })
+        })
+
+        //drop down 삭제 버튼 클릭시
+        $(document).on("click", "#rm-room-btn", function(){
+            var comment = "서버실 페이지와 등록되어있는 랙이 모두 삭제됩니다.\n삭제하시겠습니까?"
+
+            if (confirm(comment)) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "/room/" + main_data["room_idx"],
+                    success: function(data){
+                        alert(data);
+                        location.href = $(".tab-list:eq(0)").attr("href"); //첫번째 페이지로 이동
+                    }
+                }) 
+            }
+        })
+
+        //랙 추가/삭제버튼
+        //row 추가 버튼 클릭시
+        $(document).on("click", ".add-row-btn", function () {
+
+            //row 생성
+            $(".r:eq(-1)")
+                .clone()
+                .appendTo(".room")
+                .after("<hr>")
+                .find(".rack")
+                .remove();
+        });
+
+        //row 제거 버튼시
+        $(document).on("click", ".rm-row-btn", function () {
+            var target = $(this).parents(".r");
+                rack_cnt = target.find(".rack").not(".d-none").length;
+                comment = "삭제하려는 열에 랙데이터가 존재합니다.\n정말로 삭제하시겠습니까?";
+                data = {
+                    "room_idx": main_data["room_idx"],
+                    "`row`": $(".r").index(target) + 1
+                }
+
+            if (rack_cnt > 0) {
+                if(!confirm(comment)) {
+                    return ; 
+                } else {
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/room/" + main_data["room_idx"] + "/rack",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                        success: function(data){
+                            if (data == "success") {
+                                alert("삭제되었습니다.")
+                            }
+                        }
+                    })
+                }
+            }
+            
+            if ($(".r").index(target) < 1) { // 해당 열이 첫번째 열일 경우
+                target.find(".c").not(".c:eq(0)").remove();
+                target.find(".rack").remove(); 
+            } else {
+                target.next().remove();
+                target.remove();
+            }
+        });
+
+        //랙 추가/삭제 완료버튼 클릭시
+        $(".success-btn").click(function(){
+            $(".increase-btn").css("display", "none");
+            $(this).addClass("d-none");
+            $(".toast").removeClass("d-none");
+        })
+
+        //.c(container) 추가 버튼 클릭시
+        $(document).on("click", ".add-col-btn", function () {
+            $(this)
+                .parents(".r")
+                .find(".c:eq(-1)")
+                .clone()
+                .insertBefore($(this).parents(".increase-btn"))
+                .find(".rack")
+                .remove()
+        });
+
+        //.c(container) 제거 버튼 클릭시
+        $(document).on("click", ".rm-col-btn", function () {
+            var target = $(this).parents(".r").find(".c:eq(-1)");
+                row = $(".r").index($(this).parents(".r"));
+                col = $(".r:eq("+ row +") .c").index(target);
+                rack_cnt = $(".r:eq("+ row +") .c:eq("+ col +") .rack").not(".d-none").length; 
+                comment = "삭제하려는 컨테이너에 랙데이터가 존재합니다.\n정말로 삭제하시겠습니까?";
+
+            if (rack_cnt > 0){ // 해당 container 에 rack_data가 존재할 경우
+                if (!confirm(comment)) {
+                    return ;
+                } else {
+                    var data = {
+                        "room_idx": main_data["room_idx"],
+                        "`row`": row + 1,
+                        "col": col + 1
+                    }
+
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/room/" + main_data["room_idx"] + "/" + "rack",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                        success: function(data) {
+                            alert(data);
+                        }
+                    })
+                }
+            } 
+            
+            if (col < 1) { // .r 에 .c가 1개 미만일 경우 해당 container 에 rack 만 삭제
+                target.find(".rack").remove();
+            } else {
+                target.remove();
+            }
+        });
+        
+        //toast 창닫기 클릭시
+        $(document).on("click", ".toast .close", function(){
+            $(this)
+                .parents(".toast")
+                .remove();
+        })
+
+        
+
+
+        //popover 내용 생성
+        function makeContent(row, col, ord) {
+            var td_order = ["position", "temperature", "humidity", "time"];
+                c_data = [];
+                content = "데이터가 없습니다";
+            
+            for (var c of main_data["current"]["rack"]) {
+                if (c["row"] == row && c["col"] == col && c["ord"] == ord) {
+                    c_data = c;
+                    break;
+                }
+            }
+
+            try {
+                if (c_data["sensors"].length > 0) {
+                    $(".current-log")
+                        .not(".current-log:eq(0)")
+                        .remove();
+
+                    for (var sensor of c_data["sensors"]) {
+                        $(".current-log:eq(0)")
+                            .clone()
+                            .appendTo("#popover-content tbody")
+                            .children()
+                            .each(function (idx, td) {
+                                $(td).text(sensor[td_order[idx]]);
+                            });
+                    }
+                    $(".current-log:eq(0)").remove();
+                    content = $("#popover-content").html();
+                } 
+            } catch (error) {
+                ;
+            }
+            return content;
+        }
+
+        // popover
+        $(document).on("mouseover", ".rack", function () {
+            $(this).popover("dispose");
+
+            //변수 설정
+            var row = $(".r").index($(this).parents(".r"));
+                col = $(".r:eq("+ row +") .c").index($(this).parents(".c"));
+                ord = $(".r:eq("+ row +") .c:eq("+ col +") .rack").index(this);
+                title = $(this).children().text() == "" ? "-" : $(this).text();
+                
+                //팝업 옵션값 설정
+                options = {
+                title : title,
+                content: makeContent(row + 1, col + 1, ord + 1),
+                html: true,
+                trigger: "hover",
+                placement: "right",
+                boundary: "window",
+                sanitize: false,
+                container: "body",
+            };
+
+            $(this).popover(options);
+            $(this).popover("show");
+        });  
+
+        //온도체크
+        function tempCheck(){
+            if (main_data["current"] == undefined) {
+                return ;
+            }
+
+            for (cur of main_data["current"]["rack"]) {
+                var row = cur["row"] - 1;
+                    col = cur["col"] - 1;
+                    ord = cur["ord"] - 1;
+                    target = $(".r:eq("+ row +") .c:eq("+ col +") .rack:eq("+ ord +")")
+
+                target.css("background-color", cur["color"]);
+
+                if (cur["color"] == "black" ) {
+                    target.addClass("text-light");
+                } else {
+                    target.removeClass("text-light")
+                }
+            }
+        }
+
+        //log 데이터 갱신
+        function currentDataRefresh() {
+            $.ajax({
+                type: "GET",
+                url: main_data["room_idx"] + "/currentData",
+                success: function(data){
+                    var main = main_data["current"];
+                    main["rack"] = data["rack"];
+                    main["alarm_sound"] = data["alarm_sound"];
+                    main["alarm_message"] = data["alarm_message"];
+                }
+            })
+        }
+
+        //경고 알람창
+        function toast() {
+            var alarm_sound = main_data["current"]["alarm_sound"]
+
+            if (main_data["current"] == undefined || alarm_sound.length < 1) {
+                return ;
+            }
+
+            for (title of alarm_sound) {
+                if ($(".toast .rack-title:contains('"+ title +"')").length > 0) {
+                    continue;
+                }
+
+                $(".toast:eq(0)")
+                    .clone()
+                    .appendTo(".toast-position")
+                    .removeClass("ex")
+                    .find(".toast-body span a")
+                    .text(title)
+            }
+
+            $(".toast-position .ex").remove();
+            $(".toast").toast("show");
+
+            alarm_message = [];
+        }
+
+        //소리알람
+        function soundAlarm() {
+            var alarm_sound = main_data["current"]["alarm_sound"];
+
+            if (main_data["current"] == undefined || alarm_sound.length < 1) {
+                return ;
+            }
+
+            $("#sound").trigger("click");
+
+            $.ajax({
+                type: "POST",
+                url: "/room/" + main_data["room_idx"] + "/soundAlarm",
+                data: {
+                    "alarm_sound": alarm_sound
+                },
+                success: function(data){
+                    alarm_sound = [];
+                }
+            })
+        }
+
+        //sound 출력은 event를 통한 호출이 안일경우 chrome에서 error 발생
+        $("#sound").click(function(){
+                audioFile.play();
+            })
+        
+    </script>
+    <script>
+        $(document).ready(function () {
+            //초기화면 생성
+            makeRoomList(main_data["room"]); //룸탭 생성
+            makeContainer(main_data["container"]); // 컨테이너 생성
+            tempCheck(); //온도 체크 및 색상 적용
+            soundAlarm();
+            toast();
+
+            setInterval(function(){
+                currentDataRefresh(); //current data 5초마다 갱신
+                tempCheck();    //온도체크
+                soundAlarm();   //소리 알람 체크
+                toast();    //메세지알람 체크
+            }, 5000)
+        });
+    </script>
+</body>
